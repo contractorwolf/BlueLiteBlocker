@@ -1,60 +1,47 @@
-
-// {
-//     "data":{
-//        "home":{
-//           "home_timeline_urt":{
-//              "instructions":[
-//                 {
-//                    "type":"TimelineAddEntries",
-//                    "entries":[
-//                       {
-//                          "entryId":"tweet-1652096609499373568",
-
 // Import the required modules
 import fs from 'fs/promises';
 
 // Function to read JSON file, find the entries and output their count
-function filterPromoted(jsonObject) {
-  try {
-    // Access the "TimelineAddEntries" instruction using optional chaining
-    const instructions = jsonObject.data?.home?.home_timeline_urt?.instructions;
+const filterPromoted = (jsonObject) => {
+    // if the correct entries node exists, filter out all the promoted tweets
+    try {
+        // Access the "TimelineAddEntries" instruction using optional chaining
+        const instructions = jsonObject.data?.home?.home_timeline_urt?.instructions;
 
-    if (instructions) {
+        if (instructions) {
+            // find index here to put the filtered entries back in the right place
+            const instructionsIndex = instructions.findIndex((instruction) => instruction.type === 'TimelineAddEntries');
 
-        // maybe find index here so that you can get the put the filtered entries back in the right place
-      const instructionsIndex = instructions.findIndex(
-        (instruction) => instruction.type === 'TimelineAddEntries'
-      );
+            if (instructionsIndex > -1 && instructions[instructionsIndex].entries) {
 
-      if (instructionsIndex > -1 && instructions[instructionsIndex].entries) {
-        console.log(
-          'filterPromoted from total: ',
-          instructions[instructionsIndex].entries.length
-        );
+                const startingCount = instructions[instructionsIndex].entries.length;
+                console.log('starting entities: ', startingCount);
 
-        // filter out the promoted tweets
-        const filteredEntries = instructions[instructionsIndex].entries.filter(entry => {
-            return !entry.entryId.startsWith('promoted-tweet-');
-        });
+                // filter out the promoted tweets
+                const filteredEntries = instructions[instructionsIndex].entries.filter(entry => !entry.entryId.startsWith('promoted-tweet-'));
 
-        instructions[instructionsIndex].entries = filteredEntries;
+                instructions[instructionsIndex].entries = filteredEntries;
 
-        jsonObject.data.home.home_timeline_urt.instructions = instructions;
+                console.log('resulting entities: ', filteredEntries.length);
+                console.log(`removed: ${startingCount - filteredEntries.length} promoted tweets.`);
 
-      } else {
-        console.log('No "TimelineAddEntries" instruction found.');
-      }
-    } else {
-      console.log('The specified path to entries not found.');
+
+                jsonObject.data.home.home_timeline_urt.instructions = instructions;
+
+            } else {
+                console.log('TimelineAddEntries instruction not found');
+            }
+        } else {
+        console.log('instructions not found.');
+        }
+    } catch (error) {
+        console.error('Error reading the JSON:', error);
     }
-  } catch (error) {
-    console.error('Error reading the JSON file:', error);
-  }
 
-  return jsonObject;
+    return jsonObject;
 }
 
-function getUserList(jsonObject) {
+const getUserList = (jsonObject) => {
     let users = [];
 
     try {
@@ -62,29 +49,16 @@ function getUserList(jsonObject) {
       const instructions = jsonObject.data?.home?.home_timeline_urt?.instructions;
   
       if (instructions) {
-  
           // maybe find index here so that you can get the put the filtered entries back in the right place
-        const instructionsIndex = instructions.findIndex(
-          (instruction) => instruction.type === 'TimelineAddEntries'
-        );
+        const instructionsIndex = instructions.findIndex((instruction) => instruction.type === 'TimelineAddEntries');
   
         if (instructionsIndex > -1 && instructions[instructionsIndex].entries) {
-          console.log(
-            'getUserList from: ',
-            instructions[instructionsIndex].entries.length
-          );
+          console.log('getUserList from: ', instructions[instructionsIndex].entries.length);
 
           // just get the tweet 
-          const tweetEntries = instructions[instructionsIndex].entries.filter(entry => {
-              const entryId = entry.entryId;
-  
-              return entryId.startsWith('tweet-');
-          });
+          const tweetEntries = instructions[instructionsIndex].entries.filter(entry => entry.entryId?.startsWith('tweet-'));
 
-          console.log(
-            'tweets: ',
-            tweetEntries.length
-          );
+          console.log('tweets: ', tweetEntries.length);
           
           // extract the user data
           users = tweetEntries.map(entry => {
@@ -128,11 +102,7 @@ function getUserList(jsonObject) {
     }
   
     return users;
-  }
-
-
-
-
+}
 
 
 // Specify the JSON file path
@@ -146,7 +116,22 @@ const jsonData = JSON.parse(fileContent);
 const filteredRecords = filterPromoted(jsonData);
 const users = getUserList(filteredRecords);
 
-console.log(JSON.stringify(users, false, 2));  
+//console.log(JSON.stringify(users, false, 2));  
+
+// {
+//     "data":{
+//        "home":{
+//           "home_timeline_urt":{
+//              "instructions":[
+//                 {
+//                    "type":"TimelineAddEntries",
+//                    "entries":[
+//                       {
+//                          "entryId":"tweet-1652096609499373568",
+
+
+
+
 
         //1 filter out the promoted tweets
         // "entryId":"promoted-tweet-
@@ -285,3 +270,72 @@ console.log(JSON.stringify(users, false, 2));
 // "screen_name":"NewsHour",
 // "statuses_count":226272,
 // "verified":false,
+
+
+
+
+
+{
+    "entryId":"tweet-1652376463297871873",
+    "content":{
+       "entryType":"TimelineTimelineItem",
+       "itemContent":{
+          "itemType":"TimelineTweet",
+          "tweet_results":{
+             "result":{
+                "__typename":"TweetWithVisibilityResults",
+                "tweet":{
+                   "rest_id":"1652376463297871873",
+                   "core":{
+                      "user_results":{
+                         "result":{
+                            "__typename":"User",
+                            "rest_id":"21962767",
+                            "has_graduated_access":true,
+                            "is_blue_verified":false,
+                            "profile_image_shape":"Circle",
+                            "legacy":{
+                               "following":true,
+                               "can_dm":true,
+                               "can_media_tag":true,
+                               "created_at":"Thu Feb 26 03:10:42 +0000 2009",
+                               "default_profile":false,
+                               "default_profile_image":false,
+                               "description":"“Comedian”",
+                               "entities":{
+                                    {
+                                     "urls":[
+                                        {
+                                           "display_url":"Linktree.com/waltermasterson",
+                                           "expanded_url":"http://Linktree.com/waltermasterson",
+                                           "url":"https://t.co/kTHix2UKl1",
+                                           "indices":[
+                                              0,
+                                              23
+                                           ]
+                                        }
+                                     ]
+                                  }
+                               },
+                               "fast_followers_count":0,
+                               "favourites_count":15378,
+                               "followers_count":201540,
+                               "friends_count":3811,
+                               "has_custom_timelines":true,
+                               "is_translator":false,
+                               "listed_count":643,
+                               "location":"New York, NY",
+                               "media_count":3310,
+                               "name":"Walter Masterson",
+                               "normal_followers_count":201540,
+                               "possibly_sensitive":false,
+                               "profile_banner_url":"https://pbs.twimg.com/profile_banners/21962767/1660857722",
+                               "profile_image_url_https":"https://pbs.twimg.com/profile_images/1486394076421369866/SHwajLAc_normal.jpg",
+                               "profile_interstitial_type":"",
+                               "screen_name":"waltermasterson",
+                               "statuses_count":22728,
+                               "translator_type":"none",
+                               "url":"https://t.co/kTHix2UKl1",
+                               "verified":false,
+                               "want_retweets":true,
+                               "withheld_in_countries"\
